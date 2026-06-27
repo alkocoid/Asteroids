@@ -2,10 +2,12 @@ import random
 from collections.abc import Callable
 
 import pygame
-from asteroid import Asteroid
+from asteroid import Asteroid, POWER_UP_TYPES, POWER_UP_WEIGHTS
 from constants import *
 
 Edge = tuple[pygame.Vector2, Callable[[float], pygame.Vector2]]
+
+
 
 class AsteroidField(pygame.sprite.Sprite):
     containers: pygame.sprite.Group
@@ -37,10 +39,12 @@ class AsteroidField(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.spawn_timer = 0.0
 
-    def spawn(
-        self, radius: float, position: pygame.Vector2, velocity: pygame.Vector2
-    ) -> None:
-        asteroid = Asteroid(position.x, position.y, radius)
+    def spawn(self, radius, position, velocity):
+        if random.random() < 0.1:
+            power_up_class = random.choices(POWER_UP_TYPES, weights=POWER_UP_WEIGHTS, k=1)[0]
+            asteroid = power_up_class(position.x, position.y, radius)
+        else:
+            asteroid = Asteroid(position.x, position.y, radius)
         asteroid.velocity = velocity
 
     def update(self, dt: float) -> None:

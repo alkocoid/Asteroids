@@ -12,6 +12,9 @@ class Player(CircleShape):
         self.lives = 3
         self.invincible_timer = 0.0
         self.visible = True
+        self.speed_multiplier = 1.0
+        self.shoot_speed_multiplier = 1.0
+        self.cooldown_multiplier = 1.0
 
         # in the Player class
     def triangle(self) -> list[pygame.Vector2]:
@@ -56,19 +59,19 @@ class Player(CircleShape):
     def move(self, dt):
         unit_vector = pygame.Vector2(0, 1)
         rotated_vector = unit_vector.rotate(self.rotation)
-        rotated_with_speed_vector = rotated_vector * PLAYER_SPEED * dt
+        rotated_with_speed_vector = rotated_vector * PLAYER_SPEED * self.speed_multiplier * dt
         self.position += rotated_with_speed_vector
 
     def shoot(self):
         if self.cooldown_timer > 0:
             return None
         else: 
-            self.cooldown_timer = PLAYER_SHOOT_COOLDOWN_SECONDS
+            self.cooldown_timer = PLAYER_SHOOT_COOLDOWN_SECONDS * self.cooldown_multiplier
             
             shot = Shot(self.position.x, self.position.y)
             shot.velocity = pygame.Vector2(0, 1)
             shot.velocity = shot.velocity.rotate(self.rotation)
-            shot.velocity = shot.velocity * PLAYER_SHOOT_SPEED
+            shot.velocity = shot.velocity * PLAYER_SHOOT_SPEED * self.shoot_speed_multiplier
 
     def respawn_player(self):
         self.lives -= 1

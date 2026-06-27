@@ -3,14 +3,11 @@ import pygame
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH, BASE_POINTS, ASTEROID_MAX_RADIUS
 from logger import log_state, log_event
 from player import Player
-from asteroid import Asteroid
+from asteroid import Asteroid, PowerUp
 from asteroidfield import AsteroidField
 from shot import Shot
 from scoring import ScoreManager
 from ui import init_fonts, draw_text, draw_leaderboard
-
-
-
 
 def main():
     pygame.init()
@@ -109,15 +106,27 @@ def main():
                 for shot in shots:
                     if asteroid.collides_with(shot):
                         log_event("asteroid_shot")
+                        if isinstance(asteroid, PowerUp):
+                            asteroid.apply(player)
                         points = int((ASTEROID_MAX_RADIUS / asteroid.radius) * BASE_POINTS)
                         score_manager.add_points(points)
                         asteroid.split()
                         shot.kill()
             
             draw_text(screen, f"Score: {score_manager.score}", small_font, (70, 20))
-            draw_text(screen, f"Score: {score_manager.score}", small_font, (70, 20))
             draw_text(screen, f"Lives: {player.lives}", small_font, (SCREEN_WIDTH - 70, 20))
-            
+            status_lines = []
+            if player.invincible_timer > 0:
+                status_lines.append(f"Shield: {player.invincible_timer:.1f}")
+            if player.speed_multiplier > 1.0:
+                status_lines.append(f"Speed: x{player.speed_multiplier:.1f}")
+            if player.shoot_speed_multiplier > 1.0:
+                status_lines.append(f"Shoot Speed: x{player.shoot_speed_multiplier:.1f}")
+
+            for i, line in enumerate(status_lines):
+                draw_text(screen, line, small_font, (SCREEN_WIDTH - 70, 45 + i * 25))
+
+
             for object in drawable:
                 object.draw(screen)
 
