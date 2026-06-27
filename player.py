@@ -9,6 +9,9 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.cooldown_timer = 0
+        self.lives = 3
+        self.invincible_timer = 0.0
+        self.visible = True
 
         # in the Player class
     def triangle(self) -> list[pygame.Vector2]:
@@ -20,7 +23,8 @@ class Player(CircleShape):
         return [a, b, c]
     
     def draw(self, screen: pygame.Surface) -> None:
-        pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
+        if self.visible:
+            pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
 
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
@@ -42,6 +46,13 @@ class Player(CircleShape):
         
         super().update(dt)
 
+        if self.invincible_timer > 0:
+            self.invincible_timer -= dt
+            # blink by toggling visibility every 0.15 seconds
+            self.visible = int(self.invincible_timer / 0.15) % 2 == 0
+        else:
+            self.visible = True
+
     def move(self, dt):
         unit_vector = pygame.Vector2(0, 1)
         rotated_vector = unit_vector.rotate(self.rotation)
@@ -58,3 +69,10 @@ class Player(CircleShape):
             shot.velocity = pygame.Vector2(0, 1)
             shot.velocity = shot.velocity.rotate(self.rotation)
             shot.velocity = shot.velocity * PLAYER_SHOOT_SPEED
+
+    def respawn_player(self):
+        self.lives -= 1
+        self.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.velocity = pygame.Vector2(0, 0)
+        self.rotation = 0
+        self.invincible_timer = 3.0

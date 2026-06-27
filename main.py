@@ -51,6 +51,7 @@ def main():
     score_manager = ScoreManager()
     player_name = ""
 
+
     while True:
         log_state()
         for event in pygame.event.get():
@@ -92,9 +93,17 @@ def main():
             updatable.update(dt)
 
             for asteroid in asteroids:
-                if asteroid.collides_with(player):
+                if player.invincible_timer <= 0 and asteroid.collides_with(player):
                     log_event("player_hit")
-                    state = "game_over"
+                    remaining_lives = player.lives - 1
+                    if remaining_lives <= 0:
+                        state = "game_over"
+                    else:
+                        player = reset_game()
+                        player.lives = remaining_lives
+                        player.invincible_timer = 3.0
+                    break
+                    
 
             for asteroid in asteroids:
                 for shot in shots:
@@ -106,6 +115,8 @@ def main():
                         shot.kill()
             
             draw_text(screen, f"Score: {score_manager.score}", small_font, (70, 20))
+            draw_text(screen, f"Score: {score_manager.score}", small_font, (70, 20))
+            draw_text(screen, f"Lives: {player.lives}", small_font, (SCREEN_WIDTH - 70, 20))
             
             for object in drawable:
                 object.draw(screen)
